@@ -1,0 +1,18 @@
+# DayAnnouncer configuration
+# Placeholders: {day} = day number, {time} = in-game time string
+
+# Message broadcast at dawn. Supports MiniMessage formatting.
+# Examples:
+#   "<yellow>It's dawn! Day {day}</yellow>"
+#   "<gradient:gold:yellow>Dawn breaks — Day {day}</gradient>"
+message: "<yellow>It's 06:00! Day {day}</yellow>"
+
+# Which world to monitor for time changes. If empty, uses the first loaded world.
+world: ""
+
+# Check interval in ticks (20 ticks = 1 second).
+check-interval: 20
+
+# Time of day (in ticks) that counts as "dawn" for announcement purposes.
+# Minecraft time 0 = 06:00. Range 0-23999.
+dawn-threshold: 20
