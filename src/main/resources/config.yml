@@ -1,19 +1,33 @@
 # DayAnnouncer configuration
 # Placeholders: {day} = day number, {time} = in-game time string
+# Messages support MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
 
-# Message broadcast at dawn. Supports MiniMessage formatting.
-# Examples:
-#   "<yellow>It's dawn! Day {day}</yellow>"
-#   "<gradient:gold:yellow>Dawn breaks — Day {day}</gradient>"
-message: "<yellow>It's 06:00! Day {day}</yellow>"
+# Master toggle to enable/disable all announcements.
+enabled: true
 
-# Which world to monitor for time changes. If empty, uses the first loaded world.
-world: ""
+# Per-world settings. Each key is a world name.
+# If a world is not listed, no announcements fire for it.
+worlds:
+  world:
+    message: "<yellow>It's 06:00! Day {day}</yellow>"
+    # Check interval in ticks (20 ticks = 1 second).
+    check-interval: 20
+    # Tick window after dawn (time 0) during which the announcement fires.
+    # Must be >= check-interval to guarantee detection. Range 1-23999.
+    dawn-threshold: 20
 
-# Check interval in ticks (20 ticks = 1 second).
-check-interval: 20
+# Output channels — can all be enabled simultaneously.
+output:
+  # Broadcast to server chat.
+  chat: true
+  # Show in the action bar (above the hotbar).
+  action-bar: false
+  # Show as a title (large centred text) with optional subtitle.
+  title: false
+  # Show as a boss bar.
+  boss-bar: false
 
-# Tick window after dawn (time 0) during which the announcement fires.
-# Used by both the polling task and the bed-skip listener.
-# Must be >= check-interval to guarantee detection. Range 1-23999.
-dawn-threshold: 20
+# Sound played to every player when an announcement fires.
+# Set to '' or omit to disable. Uses Bukkit sound names.
+# Example: "entity.experience_orb.pickup"
+sound: ""

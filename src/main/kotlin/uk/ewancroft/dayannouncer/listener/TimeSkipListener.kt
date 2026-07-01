@@ -1,35 +1,33 @@
 package uk.ewancroft.dayannouncer.listener
 
-import net.kyori.adventure.text.Component
 import org.bukkit.World
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.world.TimeSkipEvent
+import uk.ewancroft.dayannouncer.config.WorldConfig
+import uk.ewancroft.dayannouncer.message.AnnounceDispatcher
 import uk.ewancroft.dayannouncer.message.MessageFormatter
 
-/**
- * Listens for [TimeSkipEvent] — fires when players skip the night
- * via beds or when time is changed via commands.
- *
- * If the skip lands in the dawn window, immediately announces the new day
- * rather than waiting for the next polling cycle.
- */
 class TimeSkipListener(
-    private val worldSupplier: () -> World?,
-    private val dawnThreshold: Long,
-    private val formatter: MessageFormatter,
-    private val announce: (Component) -> Unit,
+    private val perWorldState: Map<String, WorldState>,
+    private val dispatcher: AnnounceDispatcher,
 ) : Listener {
+
+    data class WorldState(
+        val worldSupplier: () -> World?,
+        val config: WorldConfig,
+    )
 
     @EventHandler
     fun onTimeSkip(event: TimeSkipEvent) {
-        val world = worldSupplier() ?: return
-        if (event.world != world) return
+        val world = event.world
+        val state = perWorldState[world.name] ?: return
+        val actualWorld = state.worldSupplier() ?: return
+        if (actualWorld !== world) return
 
-        val newTime = world.time
-        // Only announce if the skip brought us into the dawn window
-        if (newTime < dawnThreshold) {
-            announce(formatter.format(world))
+        if (world.time < state.config.dawnThreshold) {
+            val formatter = MessageFormatter(state.config.message)
+            dispatcher.announce(formatter.format(world), world)
         }
     }
 }
