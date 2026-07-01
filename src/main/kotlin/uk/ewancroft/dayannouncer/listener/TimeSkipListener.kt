@@ -16,6 +16,7 @@ import uk.ewancroft.dayannouncer.message.MessageFormatter
  */
 class TimeSkipListener(
     private val worldSupplier: () -> World?,
+    private val dawnThreshold: Long,
     private val formatter: MessageFormatter,
     private val announce: (Component) -> Unit,
 ) : Listener {
@@ -27,7 +28,7 @@ class TimeSkipListener(
 
         val newTime = world.time
         // Only announce if the skip brought us into the dawn window
-        if (newTime < 20L) {
+        if (newTime < dawnThreshold) {
             announce(formatter.format(world))
         }
     }

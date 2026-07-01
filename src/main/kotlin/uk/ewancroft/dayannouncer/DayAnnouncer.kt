@@ -22,6 +22,7 @@ class DayAnnouncer : JavaPlugin() {
     private lateinit var formatter: MessageFormatter
     private var checkTask: DayCheckTask? = null
     private var timeSkipListener: TimeSkipListener? = null
+    private var lastAnnouncedDay = -1L
 
     override fun onEnable() {
         saveDefaultConfig()
@@ -35,9 +36,13 @@ class DayAnnouncer : JavaPlugin() {
             }
         }
 
-        val announce: (Component) -> Unit = { component ->
+        val announce: (Component) -> Unit = announce@{ component ->
+            val world = worldSupplier() ?: return@announce
+            val currentDay = world.fullTime / 24000
+            if (currentDay == lastAnnouncedDay) return@announce
+            lastAnnouncedDay = currentDay
             Bukkit.broadcast(component)
-            logger.info("Day announcement: ${formatter.formatPlain(worldSupplier()!!)}")
+            logger.info("Day announcement: ${formatter.formatPlain(world)}")
         }
 
         formatter = MessageFormatter(pluginConfig.message)
@@ -51,6 +56,7 @@ class DayAnnouncer : JavaPlugin() {
 
         timeSkipListener = TimeSkipListener(
             worldSupplier = worldSupplier,
+            dawnThreshold = pluginConfig.dawnThreshold,
             formatter = formatter,
             announce = announce,
         ).also { server.pluginManager.registerEvents(it, this) }

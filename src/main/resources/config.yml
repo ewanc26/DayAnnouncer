@@ -13,6 +13,7 @@ world: ""
 # Check interval in ticks (20 ticks = 1 second).
 check-interval: 20
 
-# Time of day (in ticks) that counts as "dawn" for announcement purposes.
-# Minecraft time 0 = 06:00. Range 0-23999.
+# Tick window after dawn (time 0) during which the announcement fires.
+# Used by both the polling task and the bed-skip listener.
+# Must be >= check-interval to guarantee detection. Range 1-23999.
 dawn-threshold: 20
