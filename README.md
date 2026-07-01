@@ -17,7 +17,7 @@ A PaperMC plugin that broadcasts a message at dawn each in-game day.
 ./gradlew build
 ```
 
-Output: `build/libs/DayAnnouncer-1.2.0.jar`
+Output: `build/libs/DayAnnouncer-1.3.0.jar`
 
 ---
 
@@ -26,7 +26,7 @@ Output: `build/libs/DayAnnouncer-1.2.0.jar`
 Copy the JAR to your server's `plugins/` directory:
 
 ```bash
-cp build/libs/DayAnnouncer-1.2.0.jar /path/to/server/plugins/
+cp build/libs/DayAnnouncer-1.3.0.jar /path/to/server/plugins/
 ```
 
 Restart the server. A default `config.yml` is generated in `plugins/DayAnnouncer/`.
@@ -42,6 +42,7 @@ enabled: true
 # Per-world settings. Each key is a world name.
 worlds:
   world:
+    enabled: true
     message: "<yellow>It's 06:00! Day {day}</yellow>"
     check-interval: 20
     dawn-threshold: 20
@@ -54,13 +55,11 @@ output:
   boss-bar: false
 
 # Sound played to every player when an announcement fires.
-# Set to '' or omit to disable.
+# Set to '' or omit to disable. Uses Bukkit sound names.
 sound: ""
 ```
 
 ### Placeholders
-
-Messages support the following placeholders:
 
 | Placeholder | Description |
 |-------------|-------------|
@@ -89,6 +88,8 @@ message: "<bold><green>Day {day}</green></bold> — good morning!"
 
 Alias: `/da`
 
+Toggle state is persisted to `config.yml` and survives restarts.
+
 ---
 
 ## How It Works
@@ -101,7 +102,25 @@ A `TimeSkipEvent` listener catches night skips from beds. If the skip lands in t
 
 A shared day tracker prevents duplicate announcements when both mechanisms fire for the same dawn.
 
-The day counter comes from `World.getFullTime() / 24000` — total ticks across all days.
+### Output Channels
+
+The announcement can be delivered through multiple channels simultaneously:
+- **Chat** — broadcast to all players in the world
+- **Action bar** — displayed above the hotbar
+- **Title** — large centred text (3 second duration)
+- **Boss bar** — temporary bar that auto-hides after 5 seconds
+
+### Sounds
+
+A configurable sound effect can play alongside the announcement (e.g. `entity.experience_orb.pickup`). Uses the Bukkit sound registry.
+
+### Metrics
+
+DayAnnouncer uses bStats for anonymous usage statistics. Server administrators can disable this in `plugins/bStats/config.yml`.
+
+### Update Checking
+
+On startup, DayAnnouncer checks GitHub for newer releases. If an update is available, a message is logged to the console.
 
 ---
 
@@ -118,9 +137,11 @@ src/main/kotlin/uk/ewancroft/dayannouncer/
 │   └── DayCheckTask.kt          # Repeating time-poll task
 ├── listener/
 │   └── TimeSkipListener.kt      # Night-skip event handler
-└── message/
-    ├── AnnounceDispatcher.kt    # Multi-channel output + sound
-    └── MessageFormatter.kt     # Placeholder replacement + MiniMessage
+├── message/
+│   ├── AnnounceDispatcher.kt    # Multi-channel output + sound
+│   └── MessageFormatter.kt      # Placeholder replacement + MiniMessage
+└── util/
+    └── UpdateChecker.kt         # GitHub release update checker
 ```
 
 ---

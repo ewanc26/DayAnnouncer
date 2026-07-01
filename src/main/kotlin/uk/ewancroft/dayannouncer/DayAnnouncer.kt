@@ -1,7 +1,9 @@
 package uk.ewancroft.dayannouncer
 
+import org.bstats.bukkit.Metrics
 import org.bukkit.Bukkit
 import org.bukkit.World
+import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
 import uk.ewancroft.dayannouncer.command.DayAnnouncerCommand
 import uk.ewancroft.dayannouncer.config.PluginConfig
@@ -10,6 +12,7 @@ import uk.ewancroft.dayannouncer.listener.TimeSkipListener
 import uk.ewancroft.dayannouncer.message.AnnounceDispatcher
 import uk.ewancroft.dayannouncer.message.MessageFormatter
 import uk.ewancroft.dayannouncer.task.DayCheckTask
+import uk.ewancroft.dayannouncer.util.UpdateChecker
 
 class DayAnnouncer : JavaPlugin() {
 
@@ -28,11 +31,17 @@ class DayAnnouncer : JavaPlugin() {
         val worldConfig: WorldConfig,
         val worldSupplier: () -> World?,
         val task: DayCheckTask?,
-        var enabled: Boolean,
     )
 
     override fun onEnable() {
         saveDefaultConfig()
+
+        // bStats metrics — register at https://bstats.org and replace PLUGIN_ID
+        Metrics(this, 0)
+
+        // Async update check against GitHub releases
+        UpdateChecker(this, "ewanc26", "DayAnnouncer").checkAsync()
+
         command = DayAnnouncerCommand(this)
         val cmd = getCommand("dayannouncer") ?: return
         cmd.setExecutor(command)
@@ -51,20 +60,23 @@ class DayAnnouncer : JavaPlugin() {
 
     private fun buildPluginState(): PluginState {
         val config = PluginConfig(config)
-
         val dispatcher = AnnounceDispatcher(this, config.output, config.sound)
-
         val worldStates = mutableMapOf<String, WorldState>()
 
         for (wc in config.worlds) {
             val worldSupplier: () -> World? = { Bukkit.getWorld(wc.name) }
-            val task = DayCheckTask(wc, worldSupplier, dispatcher)
-            task.runTaskTimer(this, 0L, wc.checkInterval)
+            if (Bukkit.getWorld(wc.name) == null) {
+                logger.warning("${wc.name}: world not found — announcements queued but will not fire until the world is loaded")
+            }
+            val task = if (wc.enabled) {
+                DayCheckTask(wc, worldSupplier, dispatcher).also {
+                    it.runTaskTimer(this, 0L, wc.checkInterval)
+                }
+            } else null
             worldStates[wc.name] = WorldState(
                 worldConfig = wc,
                 worldSupplier = worldSupplier,
                 task = task,
-                enabled = true,
             )
         }
 
@@ -84,7 +96,8 @@ class DayAnnouncer : JavaPlugin() {
 
     fun restartTasks() {
         _pluginState?.worlds?.values?.forEach { it.task?.cancel(); it.task?.reset() }
-        _pluginState?.listener?.let { server.pluginManager.registerEvents(it, this) }
+        _pluginState?.dispatcher?.cancelAllBossBars()
+        HandlerList.unregisterAll(this)
         _pluginState = buildPluginState()
     }
 
@@ -96,29 +109,22 @@ class DayAnnouncer : JavaPlugin() {
     }
 
     fun toggleWorld(name: String) {
-        val state = _pluginState ?: return
-        val ws = state.worlds[name] ?: return
-        ws.enabled = !ws.enabled
-        if (ws.enabled) {
-            ws.task?.runTaskTimer(this, 0L, ws.worldConfig.checkInterval)
-        } else {
-            ws.task?.cancel()
-        }
+        val wc = _pluginState?.config?.worldConfig(name) ?: return
+        val newEnabled = !wc.enabled
+        config.set("worlds.$name.enabled", newEnabled)
+        saveConfig()
+        reloadPluginConfig()
     }
 
     fun isWorldEnabled(name: String): Boolean {
-        return _pluginState?.worlds?.get(name)?.enabled ?: false
+        return _pluginState?.config?.worldConfig(name)?.enabled ?: false
     }
 
     fun togglePlugin() {
         val state = _pluginState ?: return
-        val wasEnabled = state.config.enabled
-        state.config.enabled = !wasEnabled
-        if (state.config.enabled) {
-            restartTasks()
-        } else {
-            state.worlds.values.forEach { it.task?.cancel(); it.task?.reset() }
-            state.dispatcher.cancelAllBossBars()
-        }
+        val newEnabled = !state.config.enabled
+        config.set("enabled", newEnabled)
+        saveConfig()
+        reloadPluginConfig()
     }
 }
