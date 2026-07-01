@@ -35,7 +35,7 @@ tasks.withType(JavaCompile).configureEach {
 
 jar {
     archiveBaseName = 'DayAnnouncer'
-    archiveVersion = '1.1.1'
+    archiveVersion = '1.2.0'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     // Bundle Kotlin stdlib into the JAR
     from {

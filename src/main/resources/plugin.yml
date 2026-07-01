@@ -1,6 +1,17 @@
 name: DayAnnouncer
-version: 1.1.1
+version: 1.2.0
 main: uk.ewancroft.dayannouncer.DayAnnouncer
 api-version: '1.21'
 description: Broadcasts a message at dawn each in-game day.
 author: ewanc26
+
+commands:
+  dayannouncer:
+    description: DayAnnouncer admin commands.
+    aliases: [da]
+    permission: dayannouncer.admin
+
+permissions:
+  dayannouncer.admin:
+    description: Access to all DayAnnouncer admin commands.
+    default: op
