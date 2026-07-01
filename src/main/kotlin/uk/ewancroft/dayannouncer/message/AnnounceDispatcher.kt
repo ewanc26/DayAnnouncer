@@ -13,18 +13,26 @@ import java.time.Duration
 
 class AnnounceDispatcher(
     private val plugin: JavaPlugin,
-    private val output: OutputConfig,
-    private val soundName: String?,
+    private val defaultOutput: OutputConfig,
+    private val defaultSound: String?,
 ) {
 
     private val activeBossBars = mutableListOf<BossBar>()
 
-    fun announce(component: Component, world: World) {
+    fun announce(
+        component: Component,
+        world: World,
+        worldOutput: OutputConfig? = null,
+        worldSound: String? = null,
+    ) {
+        val output = worldOutput ?: defaultOutput
+        val sound = worldSound ?: defaultSound
+
         if (output.chat) broadcastChat(component, world)
         if (output.actionBar) broadcastActionBar(component, world)
         if (output.title) broadcastTitle(component, world)
         if (output.bossBar) broadcastBossBar(component, world)
-        if (soundName != null) playSound(world)
+        if (sound != null) playSound(world, sound)
     }
 
     private fun broadcastChat(component: Component, world: World) {
@@ -61,8 +69,8 @@ class AnnounceDispatcher(
         }, 100L)
     }
 
-    private fun playSound(world: World) {
-        val key = if (soundName!!.contains(':')) soundName else "minecraft:$soundName"
+    private fun playSound(world: World, soundName: String) {
+        val key = if (soundName.contains(':')) soundName else "minecraft:$soundName"
         val nsKey = NamespacedKey.fromString(key) ?: return
         val bukkitSound = Registry.SOUND_EVENT.get(nsKey) ?: return
         world.players.forEach { it.playSound(it.location, bukkitSound, 1f, 1f) }

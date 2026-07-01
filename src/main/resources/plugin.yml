@@ -1,5 +1,5 @@
 name: DayAnnouncer
-version: 1.3.0
+version: 1.4.0
 main: uk.ewancroft.dayannouncer.DayAnnouncer
 api-version: '1.21'
 description: Broadcasts a message at dawn each in-game day.

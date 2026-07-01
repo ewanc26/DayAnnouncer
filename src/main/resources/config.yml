@@ -1,7 +1,5 @@
 # DayAnnouncer configuration
 config-version: 1
-# Placeholders: {day} = day number, {time} = in-game time string
-# Messages support MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
 
 # Master toggle to enable/disable all announcements.
 enabled: true
@@ -11,25 +9,35 @@ enabled: true
 worlds:
   world:
     enabled: true
-    message: "<yellow>It's 06:00! Day {day}</yellow>"
+    # Single message (string) or multiple messages (list).
+    # When multiple messages are defined, one is chosen at random each dawn.
+    message: "<yellow>It's {time}! Day {day}</yellow>"
+    # messages:
+    #   - "<yellow>It's {time}! Day {day}</yellow>"
+    #   # Placeholders: {day}, {time}, {time-name}, {world}, {players}, {max-players}
     # Check interval in ticks (20 ticks = 1 second).
     check-interval: 20
     # Tick window after dawn (time 0) during which the announcement fires.
     # Must be >= check-interval to guarantee detection. Range 1-23999.
     dawn-threshold: 20
+    # Per-world output overrides. Omit to inherit the global defaults below.
+    # output:
+    #   chat: true
+    #   action-bar: false
+    #   title: false
+    #   boss-bar: false
+    # Per-world sound. Omit to inherit the global default below.
+    # sound: "entity.experience_orb.pickup"
 
-# Output channels — can all be enabled simultaneously.
+# Default output channels — used when a world doesn't define its own.
+# Can all be enabled simultaneously.
 output:
-  # Broadcast to server chat.
   chat: true
-  # Show in the action bar (above the hotbar).
   action-bar: false
-  # Show as a title (large centred text) with optional subtitle.
   title: false
-  # Show as a boss bar.
   boss-bar: false
 
-# Sound played to every player when an announcement fires.
+# Default sound played to every player when an announcement fires.
 # Set to '' or omit to disable. Uses Bukkit sound names.
-# Example: "entity.experience_orb.pickup"
+# Per-world sound can override this.
 sound: ""

@@ -9,7 +9,6 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import uk.ewancroft.dayannouncer.DayAnnouncer
-import uk.ewancroft.dayannouncer.message.MessageFormatter
 
 class DayAnnouncerCommand(
     private val plugin: DayAnnouncer,
@@ -33,7 +32,6 @@ class DayAnnouncerCommand(
 
     private fun handleReload(sender: CommandSender) {
         plugin.reloadPluginConfig()
-        plugin.restartTasks()
         sender.sendMessage(Component.text("DayAnnouncer config reloaded.", NamedTextColor.GREEN))
     }
 
@@ -55,8 +53,8 @@ class DayAnnouncerCommand(
         val config = state.config
         sender.sendMessage(Component.text("--- DayAnnouncer Status ---", NamedTextColor.GOLD))
         sender.sendMessage(Component.text("Enabled: ${config.enabled}", NamedTextColor.WHITE))
-        sender.sendMessage(Component.text("Sound: ${config.sound ?: "(none)"}", NamedTextColor.WHITE))
-        sender.sendMessage(Component.text("Output - Chat: ${config.output.chat} | ActionBar: ${config.output.actionBar} | Title: ${config.output.title} | BossBar: ${config.output.bossBar}", NamedTextColor.WHITE))
+        sender.sendMessage(Component.text("Default sound: ${config.defaultSound ?: "(none)"}", NamedTextColor.WHITE))
+        sender.sendMessage(Component.text("Default output - Chat: ${config.defaultOutput.chat} | ActionBar: ${config.defaultOutput.actionBar} | Title: ${config.defaultOutput.title} | BossBar: ${config.defaultOutput.bossBar}", NamedTextColor.WHITE))
 
         val worlds = if (worldName != null) {
             listOfNotNull(config.worldConfig(worldName))
@@ -71,8 +69,9 @@ class DayAnnouncerCommand(
             worlds.forEach { wc ->
                 val w = Bukkit.getWorld(wc.name)
                 val online = w?.players?.size ?: 0
+                val msgCount = wc.messages.size
                 sender.sendMessage(Component.text(
-                    "  ${wc.name} — msg: \"${wc.message}\" check: ${wc.checkInterval}t dawn: ${wc.dawnThreshold}t players: $online",
+                    "  ${wc.name} (${if (wc.enabled) "enabled" else "disabled"}) — $msgCount message(s) | check: ${wc.checkInterval}t dawn: ${wc.dawnThreshold}t players: $online",
                     NamedTextColor.GRAY,
                 ))
             }
