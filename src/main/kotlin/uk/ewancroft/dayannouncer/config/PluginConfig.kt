@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration
 
 data class WorldConfig(
     val name: String,
+    val enabled: Boolean,
     val message: String,
     val checkInterval: Long,
     val dawnThreshold: Long,
@@ -23,12 +24,32 @@ class PluginConfig(private val config: FileConfiguration) {
     val worlds: List<WorldConfig>
     val output: OutputConfig
     val sound: String?
+    val configVersion: Int
 
     init {
+        migrateConfig()
         enabled = config.getBoolean("enabled", true)
         worlds = parseWorlds()
         output = parseOutput()
         sound = config.getString("sound", "")?.ifBlank { null }
+        configVersion = config.getInt("config-version", 1)
+    }
+
+    private fun migrateConfig() {
+        val version = config.getInt("config-version", 0)
+        if (version >= 1) return
+
+        // v1: add enabled field to world sections
+        val worlds = config.getConfigurationSection("worlds")
+        if (worlds != null) {
+            for (key in worlds.getKeys(false)) {
+                val wc = worlds.getConfigurationSection(key)
+                if (wc != null && !wc.contains("enabled")) {
+                    wc.set("enabled", true)
+                }
+            }
+        }
+        config.set("config-version", 1)
     }
 
     private fun parseWorlds(): List<WorldConfig> {
@@ -37,6 +58,7 @@ class PluginConfig(private val config: FileConfiguration) {
             val wc = section.getConfigurationSection(key) ?: return@mapNotNull null
             WorldConfig(
                 name = key,
+                enabled = wc.getBoolean("enabled", true),
                 message = wc.getString("message") ?: "<yellow>It's 06:00! Day {day}</yellow>",
                 checkInterval = wc.getLong("check-interval", 20L).coerceAtLeast(1L),
                 dawnThreshold = wc.getLong("dawn-threshold", 20L).coerceIn(1L, 23999L),

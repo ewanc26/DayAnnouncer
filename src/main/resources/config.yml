@@ -1,4 +1,5 @@
 # DayAnnouncer configuration
+config-version: 1
 # Placeholders: {day} = day number, {time} = in-game time string
 # Messages support MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
 
@@ -9,6 +10,7 @@ enabled: true
 # If a world is not listed, no announcements fire for it.
 worlds:
   world:
+    enabled: true
     message: "<yellow>It's 06:00! Day {day}</yellow>"
     # Check interval in ticks (20 ticks = 1 second).
     check-interval: 20
