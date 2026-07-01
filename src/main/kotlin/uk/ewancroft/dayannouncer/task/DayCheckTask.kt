@@ -13,7 +13,6 @@ class DayCheckTask(
     private val dispatcher: AnnounceDispatcher,
 ) : BukkitRunnable() {
 
-    private val formatter = MessageFormatter(config.message)
     private var announced = false
     private var lastDay = -1L
 
@@ -30,7 +29,8 @@ class DayCheckTask(
         if (timeOfDay < config.dawnThreshold) {
             if (!announced) {
                 announced = true
-                dispatcher.announce(formatter.format(world), world)
+                val formatter = MessageFormatter(config.randomMessage())
+                dispatcher.announce(formatter.format(world), world, config.output, config.sound)
             }
         } else {
             announced = false

@@ -26,8 +26,8 @@ class TimeSkipListener(
         if (actualWorld !== world) return
 
         if (world.time < state.config.dawnThreshold) {
-            val formatter = MessageFormatter(state.config.message)
-            dispatcher.announce(formatter.format(world), world)
+            val formatter = MessageFormatter(state.config.randomMessage())
+            dispatcher.announce(formatter.format(world), world, state.config.output, state.config.sound)
         }
     }
 }

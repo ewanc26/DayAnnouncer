@@ -36,10 +36,7 @@ class DayAnnouncer : JavaPlugin() {
     override fun onEnable() {
         saveDefaultConfig()
 
-        // bStats metrics — register at https://bstats.org and replace PLUGIN_ID
         Metrics(this, 0)
-
-        // Async update check against GitHub releases
         UpdateChecker(this, "ewanc26", "DayAnnouncer").checkAsync()
 
         command = DayAnnouncerCommand(this)
@@ -60,7 +57,7 @@ class DayAnnouncer : JavaPlugin() {
 
     private fun buildPluginState(): PluginState {
         val config = PluginConfig(config)
-        val dispatcher = AnnounceDispatcher(this, config.output, config.sound)
+        val dispatcher = AnnounceDispatcher(this, config.defaultOutput, config.defaultSound)
         val worldStates = mutableMapOf<String, WorldState>()
 
         for (wc in config.worlds) {
@@ -104,8 +101,8 @@ class DayAnnouncer : JavaPlugin() {
     fun announceForWorld(world: World) {
         val state = _pluginState ?: return
         val wc = state.config.worldConfig(world.name) ?: return
-        val formatter = MessageFormatter(wc.message)
-        state.dispatcher.announce(formatter.format(world), world)
+        val formatter = MessageFormatter(wc.randomMessage())
+        state.dispatcher.announce(formatter.format(world), world, wc.output, wc.sound)
     }
 
     fun toggleWorld(name: String) {
