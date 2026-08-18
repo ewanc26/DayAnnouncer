@@ -11,10 +11,12 @@ worlds:
     enabled: true
     # Single message (string) or multiple messages (list).
     # When multiple messages are defined, one is chosen at random each dawn.
-    message: "<yellow>It's {time}! Day {day}</yellow>"
     # messages:
-    #   - "<yellow>It's {time}! Day {day}</yellow>"
+    #   - "<yellow>Dawn rises over {world} — Day {day} ({time})</yellow>"
+    #   - "<yellow>A new day dawns! It's {time} — Day {day}</yellow>"
+    #   - "<yellow>Sunrise at {time}. Welcome to Day {day}, {world}</yellow>"
     #   # Placeholders: {day}, {time}, {time-name}, {world}, {players}, {max-players}
+    message: "<yellow>It's {time}! Day {day}</yellow>"
     # Check interval in ticks (20 ticks = 1 second).
     check-interval: 20
     # Tick window after dawn (time 0) during which the announcement fires.
