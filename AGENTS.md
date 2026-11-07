@@ -20,4 +20,4 @@ A PaperMC plugin that broadcasts a message at dawn each in-game day.
 
 ## Recent history
 
-Sync AGENTS.md from zincfox; Sync AGENTS.md from zincfox; Sync CONTRIBUTING.md from zincfox; Sync CONTRIBUTING.md from zincfox; Update issue template: config.yml
+Update issue template: config.yml
