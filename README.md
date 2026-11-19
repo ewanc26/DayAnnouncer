@@ -91,8 +91,7 @@ worlds:
       - "<bold><green>Day {day}</green></bold> — good morning!"
 ```
 
-### Mini
-Message
+### MiniMessage
 
 Messages support [MiniMessage](https://docs.advntr.dev/minimessage/format.html) formatting:
 
@@ -144,8 +143,7 @@ A configurable sound effect can play alongside the announcement (e.g. `entity.ex
 
 ### Metrics
 
-DayAnnouncer uses bStats for anonymous usage statistics. Server administrators can disable this in `plugins/bStats/config.
-yml`.
+DayAnnouncer uses bStats for anonymous usage statistics. Server administrators can disable this in `plugins/bStats/config.yml`.
 
 ### Update Checking
 
